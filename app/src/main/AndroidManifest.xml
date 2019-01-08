@@ -3,6 +3,9 @@
     package="com.example.mohitgupta.newtodoapp">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"></uses-permission>
 
     <application
         android:allowBackup="true"
@@ -27,6 +30,11 @@
             android:theme="@style/AppTheme2"
 
             ></activity>
+        <receiver android:name=".Receiver">
+            <intent-filter>
+                <action android:name="NOTIFICATION_SERVICE" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
