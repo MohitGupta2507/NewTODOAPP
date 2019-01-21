@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -50,9 +51,9 @@ public class AddTask extends AppCompatActivity {
 
         SimpleDateFormat sdf=new SimpleDateFormat("MMM MM dd,yyy h:mm a");
         String dateString = sdf.format(date);
-        myRef=database.getReference().child("Tasks").child(dateString);
-        calendar=Calendar.getInstance();
-        setCalender=Calendar.getInstance();
+        myRef=database.getReference().child(FirebaseAuth.getInstance().getUid().toString()).child("Tasks").child(dateString);
+        calendar=new GregorianCalendar();
+        setCalender=new GregorianCalendar();
        // calendar.add(Calendar.DATE,1);
         // myRef=database.getInstance().getReference().child("Tasks");
     }
@@ -64,17 +65,21 @@ public class AddTask extends AppCompatActivity {
         myRef.child("Name").setValue(name).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-
-
-                Intent intent = new Intent(AddTask.this, Receiver.class);
-                PendingIntent pendingIntent = PendingIntent.getBroadcast(AddTask.this, 001, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                setCalender.set(calendar.HOUR,hour);
-                setCalender.set(calendar.MINUTE,min);
-                setCalender.set(calendar.SECOND,0);
-                if(setCalender.before(calendar))
+                calendar.setTimeInMillis(System.currentTimeMillis());
+                setCalender.add(Calendar.DAY_OF_YEAR,calendar.get(Calendar.DAY_OF_YEAR));
+                setCalender.set(Calendar.DATE,calendar.get(Calendar.DATE));
+                setCalender.set(Calendar.MONTH,calendar.get(Calendar.MONTH));
+                setCalender.set(Calendar.HOUR_OF_DAY,hour);
+                setCalender.set(Calendar.MINUTE,min);
+                setCalender.set(Calendar.SECOND,calendar.get(Calendar.SECOND));
+                setCalender.set(Calendar.MILLISECOND,calendar.get(Calendar.MILLISECOND));
+              /*  if(setCalender.before(calendar))
                 {
                     setCalender.add(Calendar.DATE,1);
-                }
+                }*/
+                Toast.makeText(AddTask.this,setCalender.toString(),Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(AddTask.this, Receiver.class);
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(AddTask.this, 001, intent, PendingIntent.FLAG_UPDATE_CURRENT);
                 alarmManager=(AlarmManager)getSystemService(ALARM_SERVICE);
                 alarmManager.set(AlarmManager.RTC_WAKEUP,setCalender.getTimeInMillis() , pendingIntent);
                 startActivity(new Intent(AddTask.this,MainActivity.class));

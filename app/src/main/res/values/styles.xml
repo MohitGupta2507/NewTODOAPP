@@ -17,6 +17,8 @@
     <item name="colorPrimaryDark">#4BCFFA</item>
     </style>
 
+
+
     <style name="AppTheme2" parent="AppTheme.NoActionBar">
 
     <item name="colorPrimaryDark">#A5A5A5</item>

@@ -5,7 +5,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"></uses-permission>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:allowBackup="true"
@@ -24,17 +24,40 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".AddTask"
-            android:theme="@style/AppTheme2"/>
-        <activity android:name=".SingleTask"
-            android:theme="@style/AppTheme2"
+        <activity
+            android:name=".AddTask"
+            android:theme="@style/AppTheme2" />
+        <activity
+            android:name=".SingleTask"
+            android:theme="@style/AppTheme2" />
 
-            ></activity>
         <receiver android:name=".Receiver">
             <intent-filter>
                 <action android:name="NOTIFICATION_SERVICE" />
             </intent-filter>
         </receiver>
+
+        <activity android:name=".SignIn"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+
+        <meta-data android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id"/>
+
+        <activity android:name="com.facebook.FacebookActivity"
+            android:configChanges=
+                "keyboard|keyboardHidden|screenLayout|screenSize|orientation"
+            android:label="@string/app_name" />
+        <activity
+            android:name="com.facebook.CustomTabActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="@string/fb_login_protocol_scheme" />
+            </intent-filter>
+        </activity>
+
     </application>
 
 </manifest>

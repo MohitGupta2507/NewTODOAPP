@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -45,34 +46,6 @@ public class MainActivity extends AppCompatActivity {
         mTaskList=(RecyclerView)findViewById(R.id.task_list);
         mTaskList.setHasFixedSize(true);
         mTaskList.setLayoutManager(new LinearLayoutManager(this));
-        mDatabase= FirebaseDatabase.getInstance().getReference().child("Tasks");
-
-        mDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if(!(dataSnapshot.exists()))
-                {
-                    c2.setVisibility(View.GONE);
-                    c1.setVisibility(View.VISIBLE);
-                }
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-      v=(TextView)findViewById(R.id.subtitlex);
-        SimpleDateFormat sdf=new SimpleDateFormat("EEEE");
-        Date d=new Date();
-        String dayOfTheWeek=sdf.format(d);
-        v.setText(dayOfTheWeek);
-
-        long date=System.currentTimeMillis();
-        SimpleDateFormat sdff=new SimpleDateFormat("MMM MM dd,yyy h:mm a");
-        String dateString=sdff.format(date);
-
     }
 
     public void addButtonClicked(View view) {
@@ -104,55 +77,91 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        p.setVisibility(View.VISIBLE);
-        FirebaseRecyclerAdapter<Task,TaskViewHolder> FBRA =new FirebaseRecyclerAdapter<Task, TaskViewHolder>(
-                Task.class,
-                R.layout.task_row,
-                TaskViewHolder.class,
-                mDatabase
+        if (FirebaseAuth.getInstance().getUid() == null) {
 
-        ) {
-            @Override
-            protected void populateViewHolder(TaskViewHolder viewHolder, Task model, int position) {
+            Intent i=new Intent(MainActivity.this,SignIn.class);
+            startActivity(i);
+            finish();
 
-                c1.setVisibility(View.GONE);
-                c2.setVisibility(View.VISIBLE);
-                p.setVisibility(View.GONE);
-                final String task_key=getRef(position).getKey().toString();
-                viewHolder.setName(model.getName());
-                viewHolder.setTime(model.getTime());
+        } else {
+            p.setVisibility(View.VISIBLE);
+            mDatabase= FirebaseDatabase.getInstance().getReference().child(FirebaseAuth.getInstance().getUid()).child("Tasks");
 
-                viewHolder.mView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent singleTaskActivity=new Intent(MainActivity.this,SingleTask.class);
-                        singleTaskActivity.putExtra("TaskId",task_key);
-                        startActivity(singleTaskActivity);
+            mDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if(!(dataSnapshot.exists()))
+                    {
+                        c2.setVisibility(View.GONE);
+                        c1.setVisibility(View.VISIBLE);
                     }
-                });
 
-                viewHolder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-                    @Override
-                    public boolean onLongClick(View view) {
+                }
 
-                        mDatabase.child(task_key).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull com.google.android.gms.tasks.Task<Void> task) {
-                                notifyDataSetChanged();
-                                startActivity(new Intent(MainActivity.this,MainActivity.class));
-                                finish();
-                            }
-                        });
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+            v=(TextView)findViewById(R.id.subtitlex);
+            SimpleDateFormat sdf=new SimpleDateFormat("EEEE");
+            Date d=new Date();
+            String dayOfTheWeek=sdf.format(d);
+            v.setText(dayOfTheWeek);
+
+            long date=System.currentTimeMillis();
+            SimpleDateFormat sdff=new SimpleDateFormat("MMM MM dd,yyy h:mm a");
+            String dateString=sdff.format(date);
+
+            FirebaseRecyclerAdapter<Task, TaskViewHolder> FBRA = new FirebaseRecyclerAdapter<Task, TaskViewHolder>(
+                    Task.class,
+                    R.layout.task_row,
+                    TaskViewHolder.class,
+                    mDatabase
+
+            ) {
+                @Override
+                protected void populateViewHolder(TaskViewHolder viewHolder, Task model, int position) {
+
+                    c1.setVisibility(View.GONE);
+                    c2.setVisibility(View.VISIBLE);
+                    p.setVisibility(View.GONE);
+                    final String task_key = getRef(position).getKey().toString();
+                    viewHolder.setName(model.getName());
+                    viewHolder.setTime(model.getTime());
+
+                    viewHolder.mView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Intent singleTaskActivity = new Intent(MainActivity.this, SingleTask.class);
+                            singleTaskActivity.putExtra("TaskId", task_key);
+                            startActivity(singleTaskActivity);
+                        }
+                    });
+
+                    viewHolder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                        @Override
+                        public boolean onLongClick(View view) {
+
+                            mDatabase.child(task_key).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull com.google.android.gms.tasks.Task<Void> task) {
+                                    notifyDataSetChanged();
+                                    startActivity(new Intent(MainActivity.this, MainActivity.class));
+                                    finish();
+                                }
+                            });
 
 
-                        return true;
-                    }
-                });
+                            return true;
+                        }
+                    });
 
-            }
-        };
-        mTaskList.setAdapter(FBRA);
+                }
+            };
+            mTaskList.setAdapter(FBRA);
+        }
+
     }
-
 
 }
